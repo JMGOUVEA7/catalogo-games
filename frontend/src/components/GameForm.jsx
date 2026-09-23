@@ -18,10 +18,10 @@ function GameForm({ aoAdicionar, aoFechar, salvando, erroServidor }) {
     }
 
     const anoNumero = Number(ano)
-    const anoAtual = new Date().getFullYear() + 5
+    const limiteAno = new Date().getFullYear() + 5
 
-    if (anoNumero < 1950 || anoNumero > anoAtual) {
-      setErro(`Informe um ano entre 1950 e ${anoAtual}.`)
+    if (anoNumero < 1950 || anoNumero > limiteAno) {
+      setErro(`Informe um ano entre 1950 e ${limiteAno}.`)
       return
     }
 
@@ -35,28 +35,21 @@ function GameForm({ aoAdicionar, aoFechar, salvando, erroServidor }) {
   }
 
   return (
-    <div className="modal-backdrop" onMouseDown={aoFechar}>
-      <section
-        className="modal"
+    <div className="drawer-backdrop" onMouseDown={aoFechar}>
+      <aside
+        className="drawer"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="titulo-formulario"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="modal__header">
+        <div className="drawer__header">
           <div>
-            <span className="eyebrow">NOVO JOGO</span>
-            <h2 id="titulo-formulario">Adicionar ao catálogo</h2>
-            <p>Preencha os dados abaixo para cadastrar um jogo.</p>
+            <p className="kicker">NOVO REGISTRO</p>
+            <h2>Adicionar jogo</h2>
+            <p>Cadastre um novo item na biblioteca.</p>
           </div>
 
-          <button
-            className="icon-button"
-            type="button"
-            onClick={aoFechar}
-            disabled={salvando}
-            aria-label="Fechar formulário"
-          >
+          <button type="button" className="drawer__close" onClick={aoFechar}>
             ×
           </button>
         </div>
@@ -66,8 +59,8 @@ function GameForm({ aoAdicionar, aoFechar, salvando, erroServidor }) {
             <div className="form-error">{erro || erroServidor}</div>
           )}
 
-          <label className="field field--full">
-            <span>Nome do jogo *</span>
+          <label className="field">
+            <span>Nome *</span>
             <input
               type="text"
               placeholder="Ex.: Minecraft"
@@ -77,67 +70,62 @@ function GameForm({ aoAdicionar, aoFechar, salvando, erroServidor }) {
             />
           </label>
 
-          <div className="form-grid">
-            <label className="field">
-              <span>Gênero *</span>
-              <input
-                type="text"
-                placeholder="Ex.: Sandbox"
-                value={genero}
-                onChange={(e) => setGenero(e.target.value)}
-              />
-            </label>
+          <label className="field">
+            <span>Gênero *</span>
+            <input
+              type="text"
+              placeholder="Ex.: Sandbox"
+              value={genero}
+              onChange={(e) => setGenero(e.target.value)}
+            />
+          </label>
 
-            <label className="field">
-              <span>Plataforma *</span>
-              <input
-                type="text"
-                placeholder="Ex.: PC"
-                value={plataforma}
-                onChange={(e) => setPlataforma(e.target.value)}
-              />
-            </label>
+          <label className="field">
+            <span>Plataforma *</span>
+            <input
+              type="text"
+              placeholder="Ex.: PC"
+              value={plataforma}
+              onChange={(e) => setPlataforma(e.target.value)}
+            />
+          </label>
 
-            <label className="field">
-              <span>Ano de lançamento *</span>
-              <input
-                type="number"
-                placeholder="Ex.: 2011"
-                value={ano}
-                onChange={(e) => setAno(e.target.value)}
-              />
-            </label>
+          <label className="field">
+            <span>Ano de lançamento *</span>
+            <input
+              type="number"
+              placeholder="Ex.: 2011"
+              value={ano}
+              onChange={(e) => setAno(e.target.value)}
+            />
+          </label>
 
-            <label className="favorite-toggle">
-              <input
-                type="checkbox"
-                checked={favorito}
-                onChange={(e) => setFavorito(e.target.checked)}
-              />
-              <span className="favorite-toggle__box">★</span>
-              <span>
-                <strong>Favorito</strong>
-                <small>Marcar como favorito</small>
-              </span>
-            </label>
-          </div>
+          <label className="favorite-switch">
+            <input
+              type="checkbox"
+              checked={favorito}
+              onChange={(e) => setFavorito(e.target.checked)}
+            />
+            <span className="favorite-switch__track">
+              <span className="favorite-switch__thumb" />
+            </span>
+            <span>
+              <strong>Marcar como favorito</strong>
+              <small>O jogo ficará destacado na lista.</small>
+            </span>
+          </label>
 
-          <div className="modal__actions">
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={aoFechar}
-              disabled={salvando}
-            >
+          <div className="drawer__actions">
+            <button className="button button--ghost" type="button" onClick={aoFechar}>
               Cancelar
             </button>
 
-            <button className="primary-button" type="submit" disabled={salvando}>
-              {salvando ? 'Salvando...' : 'Salvar jogo'}
+            <button className="button button--primary" type="submit" disabled={salvando}>
+              {salvando ? 'Salvando...' : 'Cadastrar'}
             </button>
           </div>
         </form>
-      </section>
+      </aside>
     </div>
   )
 }

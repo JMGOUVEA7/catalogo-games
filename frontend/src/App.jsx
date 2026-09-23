@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-
-import Header from './components/Header'
-import StatsBar from './components/StatsBar'
+import Sidebar from './components/Sidebar'
+import Toolbar from './components/Toolbar'
 import GameForm from './components/GameForm'
 import GameList from './components/GameList'
 
@@ -13,18 +12,14 @@ function App() {
   const [pesquisa, setPesquisa] = useState('')
   const [ordenacao, setOrdenacao] = useState('nome')
   const [totalJogos, setTotalJogos] = useState(0)
-
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
-  const [modalAberto, setModalAberto] = useState(false)
+  const [formularioAberto, setFormularioAberto] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [erroFormulario, setErroFormulario] = useState('')
 
   useEffect(() => {
-    const atraso = setTimeout(() => {
-      buscarJogos(pesquisa)
-    }, 300)
-
+    const atraso = setTimeout(() => buscarJogos(pesquisa), 300)
     return () => clearTimeout(atraso)
   }, [pesquisa])
 
@@ -38,17 +33,10 @@ function App() {
 
     try {
       const resposta = await fetch(url)
-
-      if (!resposta.ok) {
-        throw new Error('Falha ao buscar jogos')
-      }
-
+      if (!resposta.ok) throw new Error()
       const dados = await resposta.json()
       setJogos(dados)
-
-      if (!termo.trim()) {
-        setTotalJogos(dados.length)
-      }
+      if (!termo.trim()) setTotalJogos(dados.length)
     } catch {
       setErro('Não foi possível carregar os jogos. Verifique se o Django está rodando.')
     } finally {
@@ -63,16 +51,11 @@ function App() {
     try {
       const resposta = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(novoJogo),
       })
 
-      if (!resposta.ok) {
-        throw new Error('Falha ao cadastrar jogo')
-      }
-
+      if (!resposta.ok) throw new Error()
       const jogoCriado = await resposta.json()
 
       setTotalJogos((total) => total + 1)
@@ -81,38 +64,29 @@ function App() {
         pesquisa.trim() === '' ||
         jogoCriado.nome.toLowerCase().includes(pesquisa.trim().toLowerCase())
       ) {
-        setJogos((jogosAtuais) => [...jogosAtuais, jogoCriado])
+        setJogos((atuais) => [...atuais, jogoCriado])
       }
 
-      setModalAberto(false)
+      setFormularioAberto(false)
     } catch {
-      setErroFormulario('Não foi possível cadastrar o jogo. Tente novamente.')
+      setErroFormulario('Não foi possível cadastrar o jogo.')
     } finally {
       setSalvando(false)
     }
   }
 
   async function excluirJogo(jogo) {
-    const confirmar = window.confirm(
-      `Tem certeza que deseja excluir "${jogo.nome}"?`
-    )
-
-    if (!confirmar) {
-      return
-    }
+    const confirmar = window.confirm(`Excluir "${jogo.nome}"?`)
+    if (!confirmar) return
 
     try {
       const resposta = await fetch(`${API_URL}${jogo.id}/`, {
         method: 'DELETE',
       })
 
-      if (!resposta.ok) {
-        throw new Error('Falha ao excluir')
-      }
+      if (!resposta.ok) throw new Error()
 
-      setJogos((jogosAtuais) =>
-        jogosAtuais.filter((item) => item.id !== jogo.id)
-      )
+      setJogos((atuais) => atuais.filter((item) => item.id !== jogo.id))
       setTotalJogos((total) => Math.max(0, total - 1))
     } catch {
       alert('Não foi possível excluir o jogo.')
@@ -144,63 +118,56 @@ function App() {
   const favoritosExibidos = jogos.filter((jogo) => jogo.favorito).length
 
   return (
-    <div className="app">
-      <Header
-        pesquisa={pesquisa}
-        setPesquisa={setPesquisa}
+    <div className="app-shell">
+      <Sidebar
+        total={totalJogos}
+        exibidos={jogos.length}
+        favoritos={favoritosExibidos}
         onNovoJogo={() => {
           setErroFormulario('')
-          setModalAberto(true)
+          setFormularioAberto(true)
         }}
       />
 
-      <main className="container">
-        <section className="hero">
-          <div className="hero__content">
-            <span className="eyebrow">MINHA BIBLIOTECA</span>
-            <h1>
-              Seus jogos em um <span>só lugar.</span>
-            </h1>
-            <p>
-              Cadastre, pesquise, organize e acompanhe seu catálogo de games.
-            </p>
-          </div>
+      <main className="workspace">
+        <header className="page-heading">
+          <p className="kicker">CATÁLOGO PESSOAL</p>
+          <h1>Biblioteca de jogos</h1>
+          <p className="page-description">
+            Consulte, pesquise e organize os jogos cadastrados.
+          </p>
+        </header>
 
-          <div className="hero__visual" aria-hidden="true">
-            <div className="controller">🎮</div>
-          </div>
-        </section>
-
-        <StatsBar
-          total={totalJogos}
-          exibidos={jogos.length}
-          favoritos={favoritosExibidos}
+        <Toolbar
+          pesquisa={pesquisa}
+          setPesquisa={setPesquisa}
+          ordenacao={ordenacao}
+          setOrdenacao={setOrdenacao}
         />
 
-        <section className="catalog-section">
-          <div className="section-header">
+        <section className="content-panel">
+          <div className="content-panel__header">
             <div>
-              <span className="eyebrow">CATÁLOGO</span>
-              <h2>Todos os jogos</h2>
+              <h2>Jogos cadastrados</h2>
+              <span>
+                {pesquisa.trim()
+                  ? `${jogos.length} resultado(s) para "${pesquisa}"`
+                  : `${totalJogos} registro(s)`}
+              </span>
             </div>
 
-            <label className="sort-control">
-              <span>Ordenar por</span>
-              <select
-                value={ordenacao}
-                onChange={(e) => setOrdenacao(e.target.value)}
-              >
-                <option value="nome">Nome A–Z</option>
-                <option value="ano-recente">Mais recentes</option>
-                <option value="ano-antigo">Mais antigos</option>
-                <option value="favoritos">Favoritos primeiro</option>
-              </select>
-            </label>
+            <button
+              className="mobile-add"
+              type="button"
+              onClick={() => setFormularioAberto(true)}
+            >
+              + Adicionar
+            </button>
           </div>
 
           {erro && (
-            <div className="feedback feedback--error">
-              <strong>Erro ao carregar.</strong>
+            <div className="status-box status-box--error">
+              <strong>Falha ao carregar.</strong>
               <span>{erro}</span>
               <button type="button" onClick={() => buscarJogos(pesquisa)}>
                 Tentar novamente
@@ -209,8 +176,8 @@ function App() {
           )}
 
           {!erro && carregando && (
-            <div className="feedback">
-              <div className="spinner" />
+            <div className="status-box">
+              <div className="loader" />
               <span>Carregando...</span>
             </div>
           )}
@@ -225,13 +192,11 @@ function App() {
         </section>
       </main>
 
-      {modalAberto && (
+      {formularioAberto && (
         <GameForm
           aoAdicionar={adicionarJogo}
           aoFechar={() => {
-            if (!salvando) {
-              setModalAberto(false)
-            }
+            if (!salvando) setFormularioAberto(false)
           }}
           salvando={salvando}
           erroServidor={erroFormulario}

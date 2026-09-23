@@ -1,42 +1,35 @@
 function GameCard({ jogo, aoExcluir }) {
-  const coverClass = `game-card__cover game-card__cover--${(jogo.id % 6) + 1}`
-
   return (
-    <article className="game-card">
-      <div className={coverClass}>
-        <span className="game-card__letter">
-          {jogo.nome.charAt(0).toUpperCase()}
-        </span>
-
-        {jogo.favorito && (
-          <span className="favorite-badge">★ Favorito</span>
-        )}
+    <article className="game-row">
+      <div className="game-row__initial">
+        {jogo.nome.charAt(0).toUpperCase()}
       </div>
 
-      <div className="game-card__body">
-        <div className="game-card__title-row">
+      <div className="game-row__main">
+        <div className="game-row__title">
           <h3>{jogo.nome}</h3>
-          <button
-            className="delete-button"
-            type="button"
-            onClick={() => aoExcluir(jogo)}
-            title={`Excluir ${jogo.nome}`}
-            aria-label={`Excluir ${jogo.nome}`}
-          >
-            🗑
-          </button>
+          {jogo.favorito && <span className="favorite">★ Favorito</span>}
         </div>
 
-        <div className="game-card__tags">
+        <div className="game-row__meta">
           <span>{jogo.genero}</span>
           <span>{jogo.plataforma}</span>
-        </div>
-
-        <div className="game-card__footer">
-          <span>Lançamento</span>
-          <strong>{jogo.ano_lancamento}</strong>
+          <span>{jogo.ano_lancamento}</span>
         </div>
       </div>
+
+      <div className="game-row__year">
+        <small>Lançamento</small>
+        <strong>{jogo.ano_lancamento}</strong>
+      </div>
+
+      <button
+        type="button"
+        className="remove-button"
+        onClick={() => aoExcluir(jogo)}
+      >
+        Excluir
+      </button>
     </article>
   )
 }
